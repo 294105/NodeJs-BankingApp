@@ -78,10 +78,12 @@ exports.loginUserService = async (identifier, password) => {
     user.isLocked = false;
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '24h',
-    });
-
+    const token = jwt.sign(
+      { id: user._id, role: user.role }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '24h' }
+    );
+    
     return {
       success: true,
       message: 'Login successful',
