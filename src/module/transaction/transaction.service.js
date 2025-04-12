@@ -2,6 +2,7 @@
 const Transaction = require('../models/transaction.model');
 const Account = require('../models/account.model'); // Assuming you have an Account model
 
+
 // Initiate Fund Transfer
 exports.initiateTransactionService = async (userId, amount, toAccountNumber, description) => {
   try {
@@ -47,20 +48,23 @@ exports.initiateTransactionService = async (userId, amount, toAccountNumber, des
 
 // Get Transaction History for User
 exports.getTransactionHistoryService = async (userId) => {
-  try {
+    // Step 1: Find account using userId
+    const account = await Account.findOne({ userId });
+  
+    if (!account) {
+      throw new Error('Account not found for this user');
+    }
+  
+    // Step 2: Use account._id in the transaction query
     const transactions = await Transaction.find({
       $or: [
-        { fromAccount: { userId } },
-        { toAccount: { userId } }
+        { fromAccount: account._id },
+        { toAccount: account._id }
       ]
-    }).populate('fromAccount toAccount');
-    
+    }).sort({ createdAt: -1 });
+  
     return transactions;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
+  };
 // Get Specific Transaction by ID
 exports.getTransactionByIdService = async (userId, transactionId) => {
   try {
